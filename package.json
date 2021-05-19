@@ -9,7 +9,10 @@
   },
   "dependencies": {
     "@slack/bolt": "^3.3.0",
+    "@slack/web-api": "^6.2.3",
+    "@types/lodash": "^4.14.170",
     "dotenv": "^9.0.2",
+    "lodash": "^4.17.21",
     "ts-node": "^9.1.1"
   },
   "devDependencies": {
