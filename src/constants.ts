@@ -9,5 +9,5 @@ export const RandomCoffeeDefaultCount = 4;
 export const CoffeeBotInitialComment = "Have some coffee :)";
 export const HeaderMsg = "Random Coffee";
 export const CheckBoxSectionMrkdwn =
-  "Below is all of *RandomCoffee* participants\nPlz uncheck member to be *excluded*";
+  "Below is all of *RandomCoffee* participants ☕️ ☕ ️\nPlz uncheck member to be *excluded*";
 export const ConfirmButtonLabel = "Create Random Coffee DMs";
