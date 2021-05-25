@@ -8,9 +8,11 @@ import { ConversationsOpenResponse } from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
 import {
   AuthorizedUsers,
+  CheckUserMoreThanSplitCountExceptionMrkdwn,
   CoffeeBotInitialComment,
   CreateRandomDMsAuthorizedExceptionMrkdwn,
   RANDOM_COFFEE_USER_ID,
+  SelectSplitCountExceptionMrkdwn,
 } from "../constants";
 
 export const clickCheckBoxes: Middleware<
@@ -25,7 +27,7 @@ export const submitButton: Middleware<
 > = async ({ ack, body, client, payload, say, ...rest }) => {
   await ack();
 
-  if (AuthorizedUsers.includes(body.user.id)) {
+  if (!AuthorizedUsers.includes(body.user.id)) {
     await say({
       mrkdwn: true,
       text: CreateRandomDMsAuthorizedExceptionMrkdwn,
@@ -48,12 +50,35 @@ export const submitButton: Middleware<
   const splitCount = +Object.values(body.state.values).filter(
     // @ts-ignore
     (v) => v["select-split-count"]
-  )[0]["select-split-count"]["selected_option"].value;
+  )[0]["select-split-count"]["selected_option"]?.value;
+
+  if (isNaN(splitCount)) {
+    await say({
+      text: SelectSplitCountExceptionMrkdwn,
+      mrkdwn: true,
+    });
+    return;
+  }
+
+  if (splitCount > checkedUserIds.length) {
+    await say({
+      text: CheckUserMoreThanSplitCountExceptionMrkdwn,
+      mrkdwn: true,
+    });
+    return;
+  }
 
   const chunkedParticipants = chunk(splitCount)(checkedUserIds);
 
+  if (chunkedParticipants[chunkedParticipants.length - 1].length === 1) {
+    const leftUser = chunkedParticipants[chunkedParticipants.length - 1][0];
+    chunkedParticipants.pop();
+    chunkedParticipants[chunkedParticipants.length - 1].push(leftUser);
+  }
+
   for (const chuck of chunkedParticipants) {
     const users = chuck.join(",") + `,${RANDOM_COFFEE_USER_ID}`;
+
     const conversation: ConversationsOpenResponse = await client.apiCall(
       "conversations.open",
       {

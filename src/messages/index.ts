@@ -14,6 +14,7 @@ import {
   RANDOM_COFFEE_USER_ID,
   RandomCoffeeDefaultCount,
   RandomCoffeeMaxCount,
+  RandomCoffeeMinCount,
   SlackBlockMax,
   TEST_JD_RANDOM_COFFEE,
 } from "../constants";
@@ -59,6 +60,14 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
           throw new Error("userDisplayName should not be undefined");
         return x.userDisplayName.localeCompare(y.userDisplayName);
       });
+
+    if (processedUsers.length <= RandomCoffeeMinCount) {
+      await say({
+        text: `Random Coffee member count should be more than ${RandomCoffeeMinCount}`,
+        mrkdwn: true,
+      });
+      return;
+    }
 
     const blocks = [
       {
@@ -113,15 +122,21 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
             text: "split by",
             emoji: true,
           },
-          options: Array(Math.min(processedUsers.length, RandomCoffeeMaxCount))
+          options: Array(
+            Math.max(
+              RandomCoffeeMinCount,
+              Math.min(processedUsers.length, RandomCoffeeMaxCount)
+            )
+          )
+            .slice(1)
             .fill(null)
             .map((_, i) => ({
               text: {
                 type: "plain_text",
-                text: `${i + 1}`,
+                text: `${i + 2}`,
                 emoji: true,
               },
-              value: `${i + 1}`,
+              value: `${i + 2}`,
             })),
           action_id: "select-split-count",
           initial_option: {

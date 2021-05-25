@@ -6,14 +6,19 @@ export const ANDER_ID = "U0138GWQSCV";
 export const RANDOM_COFFEE_USER_ID = "U021LSL0EBZ";
 export const AuthorizedUsers = [ANDER_ID, JAYDEN_ID];
 export const SlackBlockMax = 10;
-export const RandomCoffeeMaxCount = 5;
+export const RandomCoffeeMinCount = 2;
+export const RandomCoffeeMaxCount = 4;
 export const RandomCoffeeDefaultCount = 4;
 export const CoffeeBotInitialComment = "Let's have some coffee ☕️ ☕";
 export const HeaderMsg = "Random Coffee";
+export const SelectSplitCountExceptionMrkdwn =
+  "You should select *Split Number* 😅";
 export const CheckBoxSectionMrkdwn =
   "Below is all of *RandomCoffee* participants ☕️ ☕ ️\nPlz uncheck member to be *excluded*";
 export const ExecRandomCoffeeAuthorizedExceptionMrkdwn =
   "Only _*authorized user*_ can use `exec_random_coffee` command 😅";
 export const CreateRandomDMsAuthorizedExceptionMrkdwn =
   "Only _*authorized user*_ can use *Create Random Coffee DMs* 😅";
+export const CheckUserMoreThanSplitCountExceptionMrkdwn =
+  "You should select users more then split count 😅";
 export const ConfirmButtonLabel = "Create Random Coffee DMs";
