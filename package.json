@@ -9,8 +9,8 @@
     "deploy": "serverless deploy",
     "start": "node build/app.js",
     "build": "tsc",
-    "predeploy": "tsc",
-    "postinstall": "npm run build"
+    "predeploy": "yarn tsc",
+    "postinstall": "yanr build"
   },
   "dependencies": {
     "@slack/bolt": "^3.3.0",
