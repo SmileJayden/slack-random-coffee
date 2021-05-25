@@ -11,12 +11,13 @@ import {
   ConfirmButtonLabel,
   ExecRandomCoffeeAuthorizedExceptionMrkdwn,
   HeaderMsg,
+  RANDOM_COFFEE_CHANNEL_ID_DEV,
+  RANDOM_COFFEE_CHANNEL_ID_PRODUCTION,
   RANDOM_COFFEE_USER_ID,
   RandomCoffeeDefaultCount,
   RandomCoffeeMaxCount,
   RandomCoffeeMinCount,
   SlackBlockMax,
-  TEST_JD_RANDOM_COFFEE,
 } from "../constants";
 
 export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
@@ -33,7 +34,9 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
     const conversationsMembersResponse: ConversationsMembersResponse =
       // plz give me generic 🥲
       await client.apiCall("conversations.members", {
-        channel: TEST_JD_RANDOM_COFFEE,
+        channel: process.env.DEVELOPMENT
+          ? RANDOM_COFFEE_CHANNEL_ID_DEV
+          : RANDOM_COFFEE_CHANNEL_ID_PRODUCTION,
       } as ConversationsMembersArguments);
 
     if (!conversationsMembersResponse.members) throw new Error("No Members");
@@ -142,10 +145,16 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
           initial_option: {
             text: {
               type: "plain_text",
-              text: `${RandomCoffeeDefaultCount}`,
+              text: `${Math.min(
+                RandomCoffeeDefaultCount,
+                processedUsers.length
+              )}`,
               emoji: true,
             },
-            value: `${RandomCoffeeDefaultCount}`,
+            value: `${Math.min(
+              RandomCoffeeDefaultCount,
+              processedUsers.length
+            )}`,
           },
         },
         label: {
