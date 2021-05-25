@@ -6,8 +6,10 @@ import {
 } from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
 import {
+  AuthorizedUsers,
   CheckBoxSectionMrkdwn,
   ConfirmButtonLabel,
+  ExecRandomCoffeeAuthorizedExceptionMrkdwn,
   HeaderMsg,
   RANDOM_COFFEE_USER_ID,
   RandomCoffeeDefaultCount,
@@ -17,7 +19,16 @@ import {
 } from "../constants";
 
 export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
-  async ({ say, client }) => {
+  async ({ say, client, payload }) => {
+    // @ts-ignore
+    if (!AuthorizedUsers.includes(payload.user)) {
+      await say({
+        mrkdwn: true,
+        text: ExecRandomCoffeeAuthorizedExceptionMrkdwn,
+      });
+      return;
+    }
+
     const conversationsMembersResponse: ConversationsMembersResponse =
       // plz give me generic 🥲
       await client.apiCall("conversations.members", {

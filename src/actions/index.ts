@@ -6,7 +6,12 @@ import {
 } from "@slack/bolt/dist/types";
 import { ConversationsOpenResponse } from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
-import { CoffeeBotInitialComment, RANDOM_COFFEE_USER_ID } from "../constants";
+import {
+  AuthorizedUsers,
+  CoffeeBotInitialComment,
+  CreateRandomDMsAuthorizedExceptionMrkdwn,
+  RANDOM_COFFEE_USER_ID,
+} from "../constants";
 
 export const clickCheckBoxes: Middleware<
   SlackActionMiddlewareArgs<BlockCheckboxesAction>
@@ -17,8 +22,16 @@ export const clickCheckBoxes: Middleware<
 
 export const submitButton: Middleware<
   SlackActionMiddlewareArgs<BlockButtonAction>
-> = async ({ ack, body, client }) => {
+> = async ({ ack, body, client, payload, say, ...rest }) => {
   await ack();
+
+  if (AuthorizedUsers.includes(body.user.id)) {
+    await say({
+      mrkdwn: true,
+      text: CreateRandomDMsAuthorizedExceptionMrkdwn,
+    });
+    return;
+  }
 
   // below code very sucks, 😣😣 where state comes from?
   const checkedUserIds = Object.values(
