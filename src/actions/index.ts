@@ -96,5 +96,7 @@ export const submitButton: Middleware<
       channel: conversation.channel.id,
       text: CoffeeBotInitialComment,
     });
+
+    // TODO(jayden) add scheduled alarm message, remove scheduled message
   }
 };
