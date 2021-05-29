@@ -36,7 +36,7 @@ export const submitButton: Middleware<
   }
 
   // below code very sucks, 😣😣 where state comes from?
-  const checkedUserIds = Object.values(
+  const checkedUserIds: string[] = Object.values(
     // @ts-ignore
     body.state.values
   )
@@ -70,10 +70,12 @@ export const submitButton: Middleware<
 
   const chunkedParticipants = chunk(splitCount)(checkedUserIds);
 
-  if (chunkedParticipants[chunkedParticipants.length - 1].length === 1) {
-    const leftUser = chunkedParticipants[chunkedParticipants.length - 1][0];
-    chunkedParticipants.pop();
-    chunkedParticipants[chunkedParticipants.length - 1].push(leftUser);
+  if (chunkedParticipants[chunkedParticipants.length - 1].length < splitCount) {
+    const leftUsers = chunkedParticipants.pop();
+    leftUsers &&
+      leftUsers.forEach((leftUser, i) => {
+        chunkedParticipants[i].push(leftUser);
+      });
   }
 
   for (const chuck of chunkedParticipants) {
