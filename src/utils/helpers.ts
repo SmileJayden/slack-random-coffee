@@ -4,6 +4,8 @@ import {
   ReactionAddedEvent,
   ReactionMessageItem,
 } from "@slack/bolt";
+import { View as HomeView } from "@slack/types/dist";
+import { welcomeBlocks } from "../blocks";
 
 export const isGenericMessageEvent = (
   msg: MessageEvent
@@ -39,3 +41,12 @@ export const createDateNdaysHence = (n: number): Date => {
   newDate.setDate(newDate.getDate() + n);
   return newDate;
 };
+
+export const getHomeView = (): HomeView => ({
+  type: "home",
+  title: {
+    type: "plain_text",
+    text: "Welcome RandomCoffeeApp!",
+  },
+  blocks: welcomeBlocks(),
+});

@@ -1,16 +1,19 @@
-import "./utils/env";
 import { App, ExpressReceiver, LogLevel } from "@slack/bolt";
+import { ViewsPublishArguments } from "@slack/web-api";
 import {
   BlockButtonAction,
   BlockCheckboxesAction,
 } from "@slack/bolt/dist/types";
 import serverlessExpress from "@vendia/serverless-express";
+import "./utils/env";
 import { execRandomCoffee } from "./messages";
 import {
   clickCheckBoxes,
   clickRemoveReminderButton,
   submitButton,
 } from "./actions";
+
+import { getHomeView } from "./utils/helpers";
 
 const token = process.env.SLACK_BOT_TOKEN;
 const signingSecret = process.env.SLACK_SIGNING_SECRET;
@@ -43,6 +46,17 @@ app.action<BlockButtonAction>(
 );
 
 app.action<BlockButtonAction>("submit-button", submitButton);
+
+app.event<"app_home_opened">(
+  "app_home_opened",
+  async ({ event, say, client, body }) => {
+    const userId = body.event.user;
+    await client.apiCall("views.publish", {
+      user_id: userId,
+      view: getHomeView(),
+    } as ViewsPublishArguments);
+  }
+);
 
 if (process.env.DEVELOPMENT) {
   (async () => {

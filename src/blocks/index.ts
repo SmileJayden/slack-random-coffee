@@ -24,3 +24,15 @@ export function createReminderBlocks(botComment: string, channelId: string) {
     },
   ];
 }
+
+export function welcomeBlocks() {
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*Welcome!* \nThis is a home for RandomCoffee app. 😀 ☕️",
+      },
+    },
+  ];
+}
