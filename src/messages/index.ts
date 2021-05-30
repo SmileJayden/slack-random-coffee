@@ -11,6 +11,7 @@ import {
   AuthorizedUsers,
   CheckBoxSectionMrkdwn,
   CoffeeBotReminderComment,
+  CoffeeDueDays,
   ConfirmButtonLabel,
   ExecRandomCoffeeAuthorizedExceptionMrkdwn,
   HeaderMsg,
@@ -22,7 +23,11 @@ import {
   RandomCoffeeMinCount,
   SlackBlockMax,
 } from "../constants";
-import { getUnixTimeStamp } from "../utils/helpers";
+import {
+  createDateNdaysHence,
+  formatDateToStr,
+  getUnixTimeStamp,
+} from "../utils/helpers";
 import { createReminderBlocks } from "../blocks";
 
 export const execCoffeeReminder: Middleware<
@@ -202,6 +207,24 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
           emoji: true,
         },
       },
+      // {
+      //   type: "input",
+      //   element: {
+      //     type: "datepicker",
+      //     initial_date: formatDateToStr(createDateNdaysHence(CoffeeDueDays)),
+      //     placeholder: {
+      //       type: "plain_text",
+      //       text: "Select Random Coffee Due Date",
+      //       emoji: true,
+      //     },
+      //     action_id: "datepicker-action",
+      //   },
+      //   label: {
+      //     type: "plain_text",
+      //     text: "Label",
+      //     emoji: true,
+      //   },
+      // },
       {
         type: "actions",
         elements: [

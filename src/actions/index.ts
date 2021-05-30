@@ -117,6 +117,7 @@ export const submitButton: Middleware<
     if (scheduledMessageId === undefined)
       throw new Error("Fail to scheduleMessage message");
 
+    // TODO datepicker에서 due date block에 추가하기
     const reminderBlocks = createReminderBlocks(
       CoffeeBotInitialComment,
       scheduledMessageId

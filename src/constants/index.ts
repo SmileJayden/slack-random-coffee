@@ -27,3 +27,4 @@ export const CreateRandomDMsAuthorizedExceptionMrkdwn =
 export const CheckUserMoreThanSplitCountExceptionMrkdwn =
   "You should select users more then split count 😅";
 export const ConfirmButtonLabel = "Create Random Coffee DMs";
+export const CoffeeDueDays = 14;
