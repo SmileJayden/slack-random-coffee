@@ -1,9 +1,6 @@
 import { StopReminderButtonLabel } from "../constants";
 
-export function createReminderBlocks(
-  botComment: string,
-  reminderMsgId: string
-) {
+export function createReminderBlocks(botComment: string, channelId: string) {
   return [
     {
       type: "section",
@@ -19,7 +16,7 @@ export function createReminderBlocks(
             text: StopReminderButtonLabel,
             emoji: true,
           },
-          value: reminderMsgId,
+          value: channelId,
           action_id: "remove-reminder-button",
           style: "danger",
         },

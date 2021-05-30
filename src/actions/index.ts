@@ -6,22 +6,32 @@ import {
 } from "@slack/bolt/dist/types";
 import {
   ChatDeleteScheduledMessageArguments,
-  ChatDeleteScheduledMessageResponse,
   ChatPostMessageArguments,
   ChatPostMessageResponse,
-  ChatScheduleMessageResponse,
+  ChatScheduledMessagesListArguments,
+  ChatScheduledMessagesListResponse,
   ConversationsOpenResponse,
 } from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
 import {
+  AlreadyRemoveAllReminders,
   AuthorizedUsers,
   CheckUserMoreThanSplitCountExceptionMrkdwn,
   CoffeeBotInitialComment,
+  CoffeeBotReminderComment,
   CreateRandomDMsAuthorizedExceptionMrkdwn,
   RANDOM_COFFEE_USER_ID,
+  ReminderCount,
+  ReminderDelayDays,
+  ReminderDelaySec,
   SelectSplitCountExceptionMrkdwn,
+  SuccessToRemoveAllReminders,
 } from "../constants";
-import { getUnixTimeStamp } from "../utils/helpers";
+import {
+  createDateNdaysHence,
+  createDateNSecondsHence,
+  getUnixTimeStamp,
+} from "../utils/helpers";
 import { createReminderBlocks } from "../blocks";
 
 export const clickCheckBoxes: Middleware<
@@ -98,34 +108,39 @@ export const submitButton: Middleware<
       }
     );
 
-    if (!conversation.channel)
-      throw new Error(`fail to open channel users: ${users}`);
+    if (!conversation.channel?.id)
+      throw new Error(`Fail to open channel users: ${users}`);
 
-    // add scheduled reminder message, stop block reminder
-    const {
-      channel: scheduledMessageChannel,
-      scheduled_message_id: scheduledMessageId,
-    }: ChatScheduleMessageResponse = await client.apiCall(
-      "chat.scheduleMessage",
-      {
-        channel: conversation.channel,
-        post_at: getUnixTimeStamp(new Date(10000)),
-        text: "exec_coffee_reminder",
-      }
+    const channelId = conversation.channel.id;
+
+    await Promise.all(
+      Array(ReminderCount)
+        .fill(null)
+        .map((_, i) =>
+          client.apiCall("chat.scheduleMessage", {
+            channel: channelId,
+            post_at: getUnixTimeStamp(
+              createDateNdaysHence(ReminderDelayDays * (i + 1))
+            ),
+            text: " ",
+            blocks: createReminderBlocks(
+              `${i}번째 Reminder: ${CoffeeBotReminderComment}`,
+              channelId
+            ),
+          })
+        )
     );
-
-    if (scheduledMessageId === undefined)
-      throw new Error("Fail to scheduleMessage message");
 
     // TODO datepicker에서 due date block에 추가하기
     const reminderBlocks = createReminderBlocks(
       CoffeeBotInitialComment,
-      scheduledMessageId
+      conversation.channel.id
     );
 
     const { channel: groupChannelId }: ChatPostMessageResponse =
       await client.apiCall("chat.postMessage", {
         channel: conversation.channel.id,
+        text: " ",
         blocks: reminderBlocks,
       });
   }
@@ -133,26 +148,45 @@ export const submitButton: Middleware<
 
 export const clickRemoveReminderButton: Middleware<
   SlackActionMiddlewareArgs<BlockButtonAction>
-> = async ({ ack, body, payload, client, ...rest }) => {
+> = async ({ ack, body, client, payload }) => {
   await ack();
 
-  console.log("body", body.channel);
-  console.log("rest", rest);
+  const removeReminderChannelId = payload.value;
 
-  const removeReminderChannelId = body.channel?.id;
-  const removeReminderScheduledMsgId = body.actions; // TODO(how I get value?)
-
-  const deleteScheduledMessageResp: ChatDeleteScheduledMessageResponse =
-    await client.apiCall("chat.deleteScheduledMessage", {
+  const chatScheduledMessagesListResponse: ChatScheduledMessagesListResponse =
+    await client.apiCall("chat.scheduledMessages.list", {
       channel: removeReminderChannelId,
-      scheduled_message_id: removeReminderChannelId,
-    } as ChatDeleteScheduledMessageArguments);
+    } as ChatScheduledMessagesListArguments);
+
+  if (!chatScheduledMessagesListResponse.scheduled_messages)
+    throw new Error("Fail to load scheduledMessages");
+
+  if (chatScheduledMessagesListResponse.scheduled_messages?.length < 1) {
+    const postMessageResp: ChatPostMessageResponse = await client.apiCall(
+      "chat.postMessage",
+      {
+        channel: removeReminderChannelId,
+        text: AlreadyRemoveAllReminders,
+      } as ChatPostMessageArguments
+    );
+    return;
+  }
+
+  await Promise.all(
+    chatScheduledMessagesListResponse.scheduled_messages.map(
+      (scheduledMessage) =>
+        client.apiCall("chat.deleteScheduledMessage", {
+          channel: removeReminderChannelId,
+          scheduled_message_id: scheduledMessage.id,
+        } as ChatDeleteScheduledMessageArguments)
+    )
+  );
 
   const postMessageResp: ChatPostMessageResponse = await client.apiCall(
     "chat.postMessage",
     {
       channel: removeReminderChannelId,
-      text: "Success to stop reminder! We hope you had a great time 🥰 🥰",
+      text: SuccessToRemoveAllReminders,
     } as ChatPostMessageArguments
   );
 };

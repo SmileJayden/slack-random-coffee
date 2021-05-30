@@ -5,7 +5,7 @@ import {
   BlockCheckboxesAction,
 } from "@slack/bolt/dist/types";
 import serverlessExpress from "@vendia/serverless-express";
-import { execCoffeeReminder, execRandomCoffee } from "./messages";
+import { execRandomCoffee } from "./messages";
 import {
   clickCheckBoxes,
   clickRemoveReminderButton,
@@ -34,8 +34,6 @@ const app = new App({
 });
 
 app.message("exec_random_coffee", execRandomCoffee);
-
-app.message("exec_coffee_reminder", execCoffeeReminder);
 
 app.action<BlockCheckboxesAction>("click-checkboxes", clickCheckBoxes);
 

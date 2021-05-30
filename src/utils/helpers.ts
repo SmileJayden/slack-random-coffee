@@ -28,6 +28,12 @@ export const formatDateToStr = (d: Date): string => {
   return `${year}-${month}-${date}`;
 };
 
+export const createDateNSecondsHence = (n: number): Date => {
+  const newDate = new Date();
+  newDate.setSeconds(newDate.getSeconds() + n);
+  return newDate;
+};
+
 export const createDateNdaysHence = (n: number): Date => {
   const newDate = new Date();
   newDate.setDate(newDate.getDate() + n);
