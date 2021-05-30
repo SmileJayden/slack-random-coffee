@@ -10,7 +10,11 @@ export const SlackBlockMax = 10;
 export const RandomCoffeeMinCount = 2;
 export const RandomCoffeeMaxCount = 4;
 export const RandomCoffeeDefaultCount = 4;
-export const CoffeeBotInitialComment = "Let's have some coffee ☕️ ☕";
+export const CoffeeBotInitialComment =
+  "Let's have some coffee ☕️ ☕\n If you want to stop reminder, plz click 알람 그만받기 button below";
+export const CoffeeBotReminderComment =
+  "업무가 바쁘셔서 커피 타임을 아직 가지시지 못하셨군요 🥲\n 그래도 동료들과 커피 한잔 하면서 잠깐 쉬어가시는 건 어떨까요? ☕️ ☕ \n If you want to stop reminder, plz click 알람 그만받기 button below";
+export const StopReminderButtonLabel = "알람 그만받기";
 export const HeaderMsg = "Random Coffee";
 export const SelectSplitCountExceptionMrkdwn =
   "You should select *Split Number* 😅";

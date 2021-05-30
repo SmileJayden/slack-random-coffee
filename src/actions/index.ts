@@ -4,7 +4,14 @@ import {
   Middleware,
   SlackActionMiddlewareArgs,
 } from "@slack/bolt/dist/types";
-import { ConversationsOpenResponse } from "@slack/web-api";
+import {
+  ChatDeleteScheduledMessageArguments,
+  ChatDeleteScheduledMessageResponse,
+  ChatPostMessageArguments,
+  ChatPostMessageResponse,
+  ChatScheduleMessageResponse,
+  ConversationsOpenResponse,
+} from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
 import {
   AuthorizedUsers,
@@ -14,6 +21,8 @@ import {
   RANDOM_COFFEE_USER_ID,
   SelectSplitCountExceptionMrkdwn,
 } from "../constants";
+import { getUnixTimeStamp } from "../utils/helpers";
+import { createReminderBlocks } from "../blocks";
 
 export const clickCheckBoxes: Middleware<
   SlackActionMiddlewareArgs<BlockCheckboxesAction>
@@ -92,11 +101,57 @@ export const submitButton: Middleware<
     if (!conversation.channel)
       throw new Error(`fail to open channel users: ${users}`);
 
-    const respPostMsg = await client.apiCall("chat.postMessage", {
-      channel: conversation.channel.id,
-      text: CoffeeBotInitialComment,
-    });
+    // add scheduled reminder message, stop block reminder
+    const {
+      channel: scheduledMessageChannel,
+      scheduled_message_id: scheduledMessageId,
+    }: ChatScheduleMessageResponse = await client.apiCall(
+      "chat.scheduleMessage",
+      {
+        channel: conversation.channel,
+        post_at: getUnixTimeStamp(new Date(10000)),
+        text: "exec_coffee_reminder",
+      }
+    );
 
-    // TODO(jayden) add scheduled alarm message, remove scheduled message
+    if (scheduledMessageId === undefined)
+      throw new Error("Fail to scheduleMessage message");
+
+    const reminderBlocks = createReminderBlocks(
+      CoffeeBotInitialComment,
+      scheduledMessageId
+    );
+
+    const { channel: groupChannelId }: ChatPostMessageResponse =
+      await client.apiCall("chat.postMessage", {
+        channel: conversation.channel.id,
+        blocks: reminderBlocks,
+      });
   }
+};
+
+export const clickRemoveReminderButton: Middleware<
+  SlackActionMiddlewareArgs<BlockButtonAction>
+> = async ({ ack, body, payload, client, ...rest }) => {
+  await ack();
+
+  console.log("body", body.channel);
+  console.log("rest", rest);
+
+  const removeReminderChannelId = body.channel?.id;
+  const removeReminderScheduledMsgId = body.actions; // TODO(how I get value?)
+
+  const deleteScheduledMessageResp: ChatDeleteScheduledMessageResponse =
+    await client.apiCall("chat.deleteScheduledMessage", {
+      channel: removeReminderChannelId,
+      scheduled_message_id: removeReminderChannelId,
+    } as ChatDeleteScheduledMessageArguments);
+
+  const postMessageResp: ChatPostMessageResponse = await client.apiCall(
+    "chat.postMessage",
+    {
+      channel: removeReminderChannelId,
+      text: "Success to stop reminder! We hope you had a great time 🥰 🥰",
+    } as ChatPostMessageArguments
+  );
 };

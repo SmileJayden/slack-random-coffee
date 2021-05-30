@@ -5,8 +5,12 @@ import {
   BlockCheckboxesAction,
 } from "@slack/bolt/dist/types";
 import serverlessExpress from "@vendia/serverless-express";
-import { execRandomCoffee } from "./messages";
-import { clickCheckBoxes, submitButton } from "./actions";
+import { execCoffeeReminder, execRandomCoffee } from "./messages";
+import {
+  clickCheckBoxes,
+  clickRemoveReminderButton,
+  submitButton,
+} from "./actions";
 
 const token = process.env.SLACK_BOT_TOKEN;
 const signingSecret = process.env.SLACK_SIGNING_SECRET;
@@ -31,7 +35,14 @@ const app = new App({
 
 app.message("exec_random_coffee", execRandomCoffee);
 
+app.message("exec_coffee_reminder", execCoffeeReminder);
+
 app.action<BlockCheckboxesAction>("click-checkboxes", clickCheckBoxes);
+
+app.action<BlockButtonAction>(
+  "remove-reminder-button",
+  clickRemoveReminderButton
+);
 
 app.action<BlockButtonAction>("submit-button", submitButton);
 

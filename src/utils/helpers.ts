@@ -16,3 +16,7 @@ export const isMessageItem = (
 ): item is ReactionMessageItem => {
   return (item as ReactionMessageItem).type === "message";
 };
+
+export const getUnixTimeStamp = (data: Date): number => {
+  return Math.floor(data.getTime() / 1000);
+};

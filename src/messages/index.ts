@@ -1,5 +1,7 @@
 import { Middleware, SlackEventMiddlewareArgs } from "@slack/bolt/dist/types";
 import {
+  ChatPostMessageResponse,
+  ChatScheduleMessageResponse,
   ConversationsMembersArguments,
   ConversationsMembersResponse,
   UsersInfoResponse,
@@ -8,6 +10,7 @@ import chunk from "lodash/fp/chunk";
 import {
   AuthorizedUsers,
   CheckBoxSectionMrkdwn,
+  CoffeeBotReminderComment,
   ConfirmButtonLabel,
   ExecRandomCoffeeAuthorizedExceptionMrkdwn,
   HeaderMsg,
@@ -19,6 +22,41 @@ import {
   RandomCoffeeMinCount,
   SlackBlockMax,
 } from "../constants";
+import { getUnixTimeStamp } from "../utils/helpers";
+import { createReminderBlocks } from "../blocks";
+
+export const execCoffeeReminder: Middleware<
+  SlackEventMiddlewareArgs<"message">
+> = async ({ say, client, payload }) => {
+  const channelId = payload; // TODO: getChannelId
+
+  // add scheduled reminder message, stop block reminder
+  const {
+    channel: scheduledMessageChannel,
+    scheduled_message_id: scheduledMessageId,
+  }: ChatScheduleMessageResponse = await client.apiCall(
+    "chat.scheduleMessage",
+    {
+      channel: channelId,
+      post_at: getUnixTimeStamp(new Date(10000)),
+      text: "exec_coffee_reminder",
+    }
+  );
+
+  if (scheduledMessageId === undefined)
+    throw new Error("Fail to scheduleMessage message");
+
+  const reminderBlocks = createReminderBlocks(
+    CoffeeBotReminderComment,
+    scheduledMessageId
+  );
+
+  const { channel: groupChannelId }: ChatPostMessageResponse =
+    await client.apiCall("chat.postMessage", {
+      channel: channelId,
+      blocks: reminderBlocks,
+    });
+};
 
 export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
   async ({ say, client, payload }) => {
