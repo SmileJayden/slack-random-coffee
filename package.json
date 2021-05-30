@@ -10,7 +10,7 @@
     "start": "node build/app.js",
     "build": "tsc",
     "predeploy": "yarn tsc",
-    "postinstall": "yanr build"
+    "postinstall": "yarn build"
   },
   "dependencies": {
     "@slack/bolt": "^3.3.0",
