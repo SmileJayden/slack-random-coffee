@@ -31,7 +31,7 @@ export function welcomeBlocks() {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*Welcome!* \nThis is a home for RandomCoffee app. 😀 ☕️",
+        text: "*Welcome!* \nThis is a home for MiniTric app. 😀🎶",
       },
     },
   ];

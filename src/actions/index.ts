@@ -64,13 +64,14 @@ export const submitButton: Middleware<
     chunk(splitCount)
   )(checkedUserIds) as string[][];
 
-  if (chunkedParticipants[chunkedParticipants.length - 1].length < splitCount) {
-    const leftUsers = chunkedParticipants.pop();
-    leftUsers &&
-      leftUsers.forEach((leftUser, i) => {
-        chunkedParticipants[i].push(leftUser);
-      });
-  }
+  // Not needed when miniTRIC bot
+  // if (chunkedParticipants[chunkedParticipants.length - 1].length < splitCount) {
+  //   const leftUsers = chunkedParticipants.pop();
+  //   leftUsers &&
+  //     leftUsers.forEach((leftUser, i) => {
+  //       chunkedParticipants[i].push(leftUser);
+  //     });
+  // }
 
   const conversations = await Promise.allSettled(
     chunkedParticipants.map((participants) => {

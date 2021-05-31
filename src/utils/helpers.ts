@@ -92,7 +92,7 @@ export const getHomeView = (): HomeView => ({
   type: "home",
   title: {
     type: "plain_text",
-    text: "Welcome RandomCoffeeApp!",
+    text: "Welcome MiniTricApp!",
   },
   blocks: welcomeBlocks(),
 });

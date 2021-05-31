@@ -44,7 +44,7 @@ app.action<BlockButtonAction>(
   clickRemoveReminderButton
 );
 
-app.command("/execrandomcoffee", execRandomCoffee);
+app.command("/execminitric", execRandomCoffee);
 
 app.view<ViewSubmitAction>("create_dms_view", submitButton);
 
