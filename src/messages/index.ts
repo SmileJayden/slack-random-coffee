@@ -17,7 +17,7 @@ import {
   HeaderMsg,
   RANDOM_COFFEE_CHANNEL_ID_DEV,
   RANDOM_COFFEE_CHANNEL_ID_PRODUCTION,
-  RANDOM_COFFEE_USER_ID,
+  RANDOM_COFFEE_BOT_ID,
   RandomCoffeeDefaultCount,
   RandomCoffeeMaxCount,
   RandomCoffeeMinCount,
@@ -54,8 +54,10 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
       )
     );
 
+    console.log('allUsers', allUsers);
+
     const processedUsers = allUsers
-      .filter((user) => user.user?.id !== RANDOM_COFFEE_USER_ID)
+      .filter((user) => user.user?.id !== RANDOM_COFFEE_BOT_ID)
       .map((user) => ({
         userDisplayName:
           user.user?.profile?.display_name_normalized ||

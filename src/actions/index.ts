@@ -21,7 +21,7 @@ import {
   CoffeeBotReminderComment,
   CreateRandomDMsAuthorizedExceptionMrkdwn,
   Day,
-  RANDOM_COFFEE_USER_ID,
+  RANDOM_COFFEE_BOT_ID,
   ReminderCount,
   ReminderDelayDays,
   ReminderDelaySec,
@@ -98,7 +98,7 @@ export const submitButton: Middleware<
   }
 
   for (const chuck of chunkedParticipants) {
-    const users = chuck.join(",") + `,${RANDOM_COFFEE_USER_ID}`;
+    const users = chuck.join(",") + `,${RANDOM_COFFEE_BOT_ID}`;
 
     const conversation: ConversationsOpenResponse = await client.apiCall(
       "conversations.open",

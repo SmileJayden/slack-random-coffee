@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "DEVELOPMENT=test ts-node-dev src/app.ts",
+    "dev:minitric": "DEVELOPMENT=test IS_MINITRIC=true ts-node-dev src/app.ts",
     "dev:serverless": "serverless offline --noPrependStageInUrl",
     "deploy": "serverless deploy",
     "start": "node build/app.js",
