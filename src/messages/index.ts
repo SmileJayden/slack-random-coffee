@@ -38,9 +38,7 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
     const conversationsMembersResponse: ConversationsMembersResponse =
       // plz give me generic 🥲
       await client.apiCall("conversations.members", {
-        channel: process.env.DEVELOPMENT
-          ? RANDOM_COFFEE_CHANNEL_ID_DEV
-          : RANDOM_COFFEE_CHANNEL_ID_PRODUCTION,
+        channel: payload.channel,
       } as ConversationsMembersArguments);
 
     if (!conversationsMembersResponse.members) throw new Error("No Members");
@@ -53,8 +51,6 @@ export const execRandomCoffee: Middleware<SlackEventMiddlewareArgs<"message">> =
           }) as Promise<UsersInfoResponse> // plz give me generic 🥲
       )
     );
-
-    console.log('allUsers', allUsers);
 
     const processedUsers = allUsers
       .filter((user) => user.user?.id !== RANDOM_COFFEE_BOT_ID)
