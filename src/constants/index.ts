@@ -38,3 +38,14 @@ export const CheckUserMoreThanSplitCountExceptionMrkdwn =
   "You should select users more then split count 😅";
 export const ConfirmButtonLabel = "Create Random Coffee DMs";
 export const CoffeeDueDays = 14;
+
+// utils
+export enum Day {
+  SUNDAY,
+  MONDAY,
+  TUESDAY,
+  WEDNESDAY,
+  THURSDAY,
+  FRIDAY,
+  SATURDAY,
+}

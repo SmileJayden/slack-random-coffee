@@ -20,6 +20,7 @@ import {
   CoffeeBotInitialComment,
   CoffeeBotReminderComment,
   CreateRandomDMsAuthorizedExceptionMrkdwn,
+  Day,
   RANDOM_COFFEE_USER_ID,
   ReminderCount,
   ReminderDelayDays,
@@ -28,8 +29,7 @@ import {
   SuccessToRemoveAllReminders,
 } from "../constants";
 import {
-  createDateNdaysHence,
-  createDateNSecondsHence,
+  createNextNReminderDatesByMultipleDays,
   getUnixTimeStamp,
 } from "../utils/helpers";
 import { createReminderBlocks } from "../blocks";
@@ -114,21 +114,20 @@ export const submitButton: Middleware<
     const channelId = conversation.channel.id;
 
     await Promise.all(
-      Array(ReminderCount)
-        .fill(null)
-        .map((_, i) =>
-          client.apiCall("chat.scheduleMessage", {
-            channel: channelId,
-            post_at: getUnixTimeStamp(
-              createDateNdaysHence(ReminderDelayDays * (i + 1))
-            ),
-            text: " ",
-            blocks: createReminderBlocks(
-              `${i}번째 Reminder: ${CoffeeBotReminderComment}`,
-              channelId
-            ),
-          })
-        )
+      createNextNReminderDatesByMultipleDays(new Date(), ReminderCount, [
+        Day.MONDAY,
+        Day.THURSDAY,
+      ]).map((date, i) =>
+        client.apiCall("chat.scheduleMessage", {
+          channel: channelId,
+          post_at: getUnixTimeStamp(date),
+          text: " ",
+          blocks: createReminderBlocks(
+            `${i}번째 Reminder: ${CoffeeBotReminderComment}`,
+            channelId
+          ),
+        })
+      )
     );
 
     // TODO datepicker에서 due date block에 추가하기

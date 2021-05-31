@@ -42,6 +42,52 @@ export const createDateNdaysHence = (n: number): Date => {
   return newDate;
 };
 
+export const getNextDayOfWeek = (date: Date, dayOfWeek: number): Date => {
+  const resultDate = new Date(date.getTime());
+  resultDate.setDate(
+    date.getDate() + ((7 + dayOfWeek - date.getDay() - 1) % 7) + 1
+  );
+  return resultDate;
+};
+
+export const getNextDayOfWeekByMultipleDays = (
+  date: Date,
+  dayOfWeek: number[]
+): Date => {
+  const resultDates: Date[] = [];
+  for (const day of dayOfWeek) {
+    const resultDate = new Date(date.getTime());
+    resultDate.setDate(
+      date.getDate() + ((7 + day - date.getDay() - 1) % 7) + 1
+    );
+    resultDates.push(resultDate);
+  }
+
+  return resultDates.reduce(function (prev, curr) {
+    return prev > curr ? prev : curr;
+  });
+};
+
+export const createNextNReminderDatesByMultipleDays = (
+  date: Date,
+  n: number,
+  days: number[]
+): Date[] => {
+  if (n === 0) return [];
+  else if (n === 1) {
+    const nextDay = getNextDayOfWeekByMultipleDays(date, days);
+    return [nextDay];
+  } else {
+    const resultDates = createNextNReminderDatesByMultipleDays(
+      date,
+      n - 1,
+      days
+    );
+    const nextDay = getNextDayOfWeekByMultipleDays(resultDates[0], days);
+    return [nextDay, ...resultDates];
+  }
+};
+
 export const getHomeView = (): HomeView => ({
   type: "home",
   title: {
