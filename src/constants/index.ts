@@ -15,7 +15,7 @@ export const RandomCoffeeDefaultCount = 4;
 export const CoffeeBotInitialComment =
   "Let's have some coffee ☕️ ☕\n\n If you want to stop reminder, plz click 'Stop Reminder' button below";
 export const CoffeeBotReminderComment =
-  "업무가 바쁘셔서 커피 타임을 아직 가지시지 못하셨군요 🥲 🥲\n 그래도 동료들과 커피 한잔 하면서 잠깐 쉬어가시는 건 어떨까요? ☕️ ☕ \n\n If you want to stop reminder, plz click 'Stop Reminder' button below";
+  "업무가 바쁘셔서 커피 타임을 아직 가지시지 못하셨나요? 🥲 🥲\n 그래도 동료들과 커피 한잔 하면서 잠깐 쉬어가시는 건 어떨까요? ☕️ ☕ \n\n If you want to stop reminder, plz click 'Stop Reminder' button below";
 export const StopReminderButtonLabel = "Stop Reminder";
 export const SuccessToRemoveAllReminders =
   "Success to stop reminder! We hope you had a great time 🥰 🥰";
