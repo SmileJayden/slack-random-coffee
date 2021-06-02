@@ -6,7 +6,7 @@ import {
 } from "@slack/bolt/dist/types";
 import serverlessExpress from "@vendia/serverless-express";
 import "./utils/env";
-import { execRandomCoffee } from "./messages";
+import { execRandomCoffee } from "./commands";
 import {
   clickCheckBoxes,
   clickRemoveReminderButton,
