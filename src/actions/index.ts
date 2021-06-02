@@ -10,9 +10,13 @@ import {
   ChatPostMessageResponse,
   ChatScheduledMessagesListArguments,
   ChatScheduledMessagesListResponse,
+  ChatScheduleMessageArguments,
+  ChatScheduleMessageResponse,
   ConversationsOpenResponse,
 } from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
+import pipe from "lodash/fp/pipe";
+import shuffle from "lodash/fp/shuffle";
 import {
   AlreadyRemoveAllReminders,
   AuthorizedUsers,
@@ -38,7 +42,7 @@ export const clickCheckBoxes: Middleware<
   SlackActionMiddlewareArgs<BlockCheckboxesAction>
 > = async ({ ack, body }) => {
   await ack();
-  console.log(body.actions[0].selected_options.map((option) => option.text));
+  console.info(body.actions[0].selected_options.map((option) => option.text));
 };
 
 export const submitButton: Middleware<
@@ -87,7 +91,10 @@ export const submitButton: Middleware<
     return;
   }
 
-  const chunkedParticipants = chunk(splitCount)(checkedUserIds);
+  const chunkedParticipants = pipe(
+    shuffle,
+    chunk(splitCount)
+  )(checkedUserIds) as string[][];
 
   if (chunkedParticipants[chunkedParticipants.length - 1].length < splitCount) {
     const leftUsers = chunkedParticipants.pop();
@@ -97,52 +104,69 @@ export const submitButton: Middleware<
       });
   }
 
-  for (const chuck of chunkedParticipants) {
-    const users = chuck.join(",") + `,${RANDOM_COFFEE_BOT_ID}`;
-
-    const conversation: ConversationsOpenResponse = await client.apiCall(
-      "conversations.open",
-      {
+  const conversations = await Promise.allSettled(
+    chunkedParticipants.map((participants) => {
+      const users = participants.join(",");
+      return client.apiCall("conversations.open", {
         users,
         return_im: true,
-      }
-    );
+      }) as Promise<ConversationsOpenResponse>;
+    })
+  );
 
-    if (!conversation.channel?.id)
-      throw new Error(`Fail to open channel users: ${users}`);
+  const fulfilledConversations = conversations.filter(
+    (
+      conversation
+    ): conversation is PromiseFulfilledResult<ConversationsOpenResponse> =>
+      conversation.status === "fulfilled"
+  );
 
-    const channelId = conversation.channel.id;
+  console.info("fulfilledConversations", fulfilledConversations);
 
-    await Promise.all(
-      createNextNReminderDatesByMultipleDays(new Date(), ReminderCount, [
-        Day.MONDAY,
-        Day.THURSDAY,
-      ]).map((date, i) =>
-        client.apiCall("chat.scheduleMessage", {
-          channel: channelId,
-          post_at: getUnixTimeStamp(date),
-          text: " ",
-          blocks: createReminderBlocks(
-            `${i}번째 Reminder: ${CoffeeBotReminderComment}`,
-            channelId
-          ),
-        })
-      )
-    );
+  const postMessagePromises = fulfilledConversations.map((c) => {
+    const channelId = c.value.channel?.id;
+    if (!channelId)
+      throw new Error(`Fail to open channel channelId: ${channelId}`);
 
-    // TODO datepicker에서 due date block에 추가하기
     const reminderBlocks = createReminderBlocks(
       CoffeeBotInitialComment,
-      conversation.channel.id
+      channelId
     );
 
-    const { channel: groupChannelId }: ChatPostMessageResponse =
-      await client.apiCall("chat.postMessage", {
-        channel: conversation.channel.id,
-        text: " ",
-        blocks: reminderBlocks,
-      });
-  }
+    return client.apiCall("chat.postMessage", {
+      channel: channelId,
+      text: " ",
+      blocks: reminderBlocks,
+    } as ChatPostMessageArguments) as Promise<ChatPostMessageResponse>;
+  });
+
+  const scheduleMessagePromises = fulfilledConversations.flatMap((c) => {
+    const channelId = c.value.channel?.id;
+    if (!channelId)
+      throw new Error(`Fail to open channel channelId: ${channelId}`);
+
+    return createNextNReminderDatesByMultipleDays(new Date(), ReminderCount, [
+      Day.MONDAY,
+      Day.THURSDAY,
+    ]).map(
+      (date, i) =>
+        client.apiCall("chat.scheduleMessage", {
+          channel: channelId,
+          post_at: getUnixTimeStamp(date).toString(),
+          text: " ",
+          blocks: createReminderBlocks(
+            `${i + 1}번째 Reminder: ${CoffeeBotReminderComment}`,
+            channelId
+          ),
+        } as ChatScheduleMessageArguments) as Promise<ChatScheduleMessageResponse>
+    );
+  });
+
+  const postMessageRes = await Promise.all(postMessagePromises);
+  console.info("postMessageRes", postMessageRes);
+
+  const scheduleMessageRes = await Promise.all(scheduleMessagePromises);
+  console.info("scheduleMessageRes", scheduleMessageRes);
 };
 
 export const clickRemoveReminderButton: Middleware<
