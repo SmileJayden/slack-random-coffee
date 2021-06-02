@@ -102,6 +102,7 @@ export const execRandomCoffee: Middleware<SlackCommandMiddlewareArgs> = async ({
     },
     ...chunk(SlackBlockMax)(processedUsers).map((chunkedUsers) => ({
       type: "input",
+      optional: true,
       element: {
         type: "checkboxes",
         options: chunkedUsers.map((user) => ({
