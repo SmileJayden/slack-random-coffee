@@ -32,7 +32,7 @@ export const SelectSplitCountExceptionMrkdwn =
 export const CheckBoxSectionMrkdwn =
   "Below is all of *RandomCoffee* participants ☕️ ☕ ️\nPlz uncheck member to be *excluded*";
 export const ExecRandomCoffeeAuthorizedExceptionMrkdwn =
-  "Only _*authorized user*_ can use `exec_random_coffee` command 😅";
+  "Only _*authorized user*_ can use `execrandomcoffee` command 😅";
 export const CreateRandomDMsAuthorizedExceptionMrkdwn =
   "Only _*authorized user*_ can use *Create Random Coffee DMs* 😅";
 export const CheckUserMoreThanSplitCountExceptionMrkdwn =

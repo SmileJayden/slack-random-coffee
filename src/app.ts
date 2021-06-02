@@ -14,6 +14,7 @@ import {
 } from "./actions";
 
 import { getHomeView } from "./utils/helpers";
+import { ViewSubmitAction } from "@slack/bolt/dist/types/view";
 
 const token = process.env.SLACK_BOT_TOKEN;
 const signingSecret = process.env.SLACK_SIGNING_SECRET;
@@ -36,8 +37,6 @@ const app = new App({
   logLevel: LogLevel.DEBUG,
 });
 
-app.message("exec_random_coffee", execRandomCoffee);
-
 app.action<BlockCheckboxesAction>("click-checkboxes", clickCheckBoxes);
 
 app.action<BlockButtonAction>(
@@ -45,7 +44,9 @@ app.action<BlockButtonAction>(
   clickRemoveReminderButton
 );
 
-app.action<BlockButtonAction>("submit-button", submitButton);
+app.command("/execrandomcoffee", execRandomCoffee);
+
+app.view<ViewSubmitAction>("create_dms_view", submitButton);
 
 app.event<"app_home_opened">(
   "app_home_opened",

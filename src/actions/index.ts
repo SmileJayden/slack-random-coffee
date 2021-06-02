@@ -3,6 +3,7 @@ import {
   BlockCheckboxesAction,
   Middleware,
   SlackActionMiddlewareArgs,
+  SlackViewMiddlewareArgs,
 } from "@slack/bolt/dist/types";
 import {
   ChatDeleteScheduledMessageArguments,
@@ -19,17 +20,10 @@ import pipe from "lodash/fp/pipe";
 import shuffle from "lodash/fp/shuffle";
 import {
   AlreadyRemoveAllReminders,
-  AuthorizedUsers,
-  CheckUserMoreThanSplitCountExceptionMrkdwn,
   CoffeeBotInitialComment,
   CoffeeBotReminderComment,
-  CreateRandomDMsAuthorizedExceptionMrkdwn,
   Day,
-  RANDOM_COFFEE_BOT_ID,
   ReminderCount,
-  ReminderDelayDays,
-  ReminderDelaySec,
-  SelectSplitCountExceptionMrkdwn,
   SuccessToRemoveAllReminders,
 } from "../constants";
 import {
@@ -37,6 +31,7 @@ import {
   getUnixTimeStamp,
 } from "../utils/helpers";
 import { createReminderBlocks } from "../blocks";
+import { ViewSubmitAction } from "@slack/bolt/dist/types/view";
 
 export const clickCheckBoxes: Middleware<
   SlackActionMiddlewareArgs<BlockCheckboxesAction>
@@ -46,50 +41,17 @@ export const clickCheckBoxes: Middleware<
 };
 
 export const submitButton: Middleware<
-  SlackActionMiddlewareArgs<BlockButtonAction>
-> = async ({ ack, body, client, payload, say, ...rest }) => {
-  await ack();
-
-  if (!AuthorizedUsers.includes(body.user.id)) {
-    await say({
-      mrkdwn: true,
-      text: CreateRandomDMsAuthorizedExceptionMrkdwn,
-    });
-    return;
-  }
-
+  SlackViewMiddlewareArgs<ViewSubmitAction>
+> = async ({ ack, body, client, payload, ...rest }) => {
   // below code very sucks, 😣😣 where state comes from?
-  const checkedUserIds: string[] = Object.values(
-    // @ts-ignore
-    body.state.values
-  )
-    // @ts-ignore
-    .filter((v) => v["click-checkboxes"])
-    // @ts-ignore
+  const checkedUserIds: string[] = Object.values(payload.state.values)
+    .filter((v) => !!v["click-checkboxes"])
     .flatMap((v) => v["click-checkboxes"]["selected_options"])
     .map((v) => v.value);
 
-  // @ts-ignore
-  const splitCount = +Object.values(body.state.values).filter(
-    // @ts-ignore
+  const splitCount = Object.values(payload.state.values).filter(
     (v) => v["select-split-count"]
-  )[0]["select-split-count"]["selected_option"]?.value;
-
-  if (isNaN(splitCount)) {
-    await say({
-      text: SelectSplitCountExceptionMrkdwn,
-      mrkdwn: true,
-    });
-    return;
-  }
-
-  if (splitCount > checkedUserIds.length) {
-    await say({
-      text: CheckUserMoreThanSplitCountExceptionMrkdwn,
-      mrkdwn: true,
-    });
-    return;
-  }
+  )[0]["select-split-count"].selected_option.value;
 
   const chunkedParticipants = pipe(
     shuffle,
@@ -113,6 +75,8 @@ export const submitButton: Middleware<
       }) as Promise<ConversationsOpenResponse>;
     })
   );
+
+  await ack();
 
   const fulfilledConversations = conversations.filter(
     (
