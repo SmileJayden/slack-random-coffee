@@ -20,7 +20,6 @@ import pipe from "lodash/fp/pipe";
 import shuffle from "lodash/fp/shuffle";
 import {
   AlreadyRemoveAllReminders,
-  CoffeeBotInitialComment,
   CoffeeBotReminderComment,
   Day,
   ReminderCount,
@@ -49,9 +48,13 @@ export const submitButton: Middleware<
     .flatMap((v) => v["click-checkboxes"]["selected_options"])
     .map((v) => v.value);
 
-  const splitCount = Object.values(payload.state.values).filter(
+  const splitCount = +Object.values(payload.state.values).filter(
     (v) => v["select-split-count"]
   )[0]["select-split-count"].selected_option.value;
+
+  const initMsg = Object.values(payload.state.values).filter(
+    (v) => v["plain_text_input_bot_init_comment"]
+  )[0]["plain_text_input_bot_init_comment"].value;
 
   const chunkedParticipants = pipe(
     shuffle,
@@ -92,10 +95,7 @@ export const submitButton: Middleware<
     if (!channelId)
       throw new Error(`Fail to open channel channelId: ${channelId}`);
 
-    const reminderBlocks = createReminderBlocks(
-      CoffeeBotInitialComment,
-      channelId
-    );
+    const reminderBlocks = createReminderBlocks(initMsg, channelId);
 
     return client.apiCall("chat.postMessage", {
       channel: channelId,

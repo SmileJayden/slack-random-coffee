@@ -9,6 +9,7 @@ import {
   ConversationsMembersArguments,
   ConversationsMembersResponse,
   UsersInfoResponse,
+  ViewsOpenArguments,
 } from "@slack/web-api";
 import chunk from "lodash/fp/chunk";
 import {
@@ -27,6 +28,7 @@ import {
   RandomCoffeeMinCount,
   SlackBlockMax,
   MINITRIC_BOT_ID,
+  CoffeeBotInitialComment,
 } from "../constants";
 
 export const execRandomCoffee: Middleware<SlackCommandMiddlewareArgs> = async ({
@@ -164,9 +166,24 @@ export const execRandomCoffee: Middleware<SlackCommandMiddlewareArgs> = async ({
           value: `${Math.min(RandomCoffeeDefaultCount, processedUsers.length)}`,
         },
       },
+
       label: {
         type: "plain_text",
         text: "Split Number",
+        emoji: true,
+      },
+    },
+    {
+      type: "input",
+      element: {
+        type: "plain_text_input",
+        multiline: true,
+        action_id: "plain_text_input_bot_init_comment",
+        initial_value: CoffeeBotInitialComment,
+      },
+      label: {
+        type: "plain_text",
+        text: "공지 메세지",
         emoji: true,
       },
     },
@@ -188,7 +205,7 @@ export const execRandomCoffee: Middleware<SlackCommandMiddlewareArgs> = async ({
           text: "Submit",
         },
       },
-    });
+    } as ViewsOpenArguments);
     console.info(result);
   } catch (e) {
     console.error(e);
