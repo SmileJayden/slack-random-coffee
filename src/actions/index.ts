@@ -42,6 +42,8 @@ export const clickCheckBoxes: Middleware<
 export const submitButton: Middleware<
   SlackViewMiddlewareArgs<ViewSubmitAction>
 > = async ({ ack, body, client, payload, ...rest }) => {
+  await ack();
+
   // below code very sucks, 😣😣 where state comes from?
   const checkedUserIds: string[] = Object.values(payload.state.values)
     .filter((v) => !!v["click-checkboxes"])
@@ -78,8 +80,6 @@ export const submitButton: Middleware<
       }) as Promise<ConversationsOpenResponse>;
     })
   );
-
-  await ack();
 
   const fulfilledConversations = conversations.filter(
     (
@@ -119,7 +119,7 @@ export const submitButton: Middleware<
           post_at: getUnixTimeStamp(date).toString(),
           text: " ",
           blocks: createReminderBlocks(
-            `${i + 1}번째 Reminder: ${CoffeeBotReminderComment}`,
+            `${5 - i}번째 Reminder: ${CoffeeBotReminderComment}`,
             channelId
           ),
         } as ChatScheduleMessageArguments) as Promise<ChatScheduleMessageResponse>
