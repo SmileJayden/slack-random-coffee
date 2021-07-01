@@ -22,6 +22,7 @@ import {
   AlreadyRemoveAllReminders,
   CoffeeBotReminderComment,
   Day,
+  JAYDEN_ID,
   ReminderCount,
   SuccessToRemoveAllReminders,
 } from "../constants";
@@ -80,6 +81,15 @@ export const submitButton: Middleware<
       }) as Promise<ConversationsOpenResponse>;
     })
   );
+
+  const conversationsText = chunkedParticipants.reduce((a, e, i) => {
+    return a + `\n\n${i + 1}번째 그룹: ${e.join(", ")}`;
+  }, "");
+
+  await client.apiCall("chat.postMessage", {
+    text: "conversations 생성 완료\n\n" + conversationsText,
+    channel: JAYDEN_ID,
+  } as ChatPostMessageArguments);
 
   const fulfilledConversations = conversations.filter(
     (
